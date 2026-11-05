@@ -10,3 +10,23 @@ __pycache__/
 
 results/
 *.log
+# Secrets
+api-token.txt
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+kubeconfig
+credentials.json
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+.DS_Store
+Thumbs.db
