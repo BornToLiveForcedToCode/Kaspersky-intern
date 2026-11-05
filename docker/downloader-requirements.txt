@@ -1,5 +1,4 @@
-# Runtime dependency closure for src/download_model.py (huggingface_hub snapshot_download).
-# All direct and transitive runtime dependencies are pinned.
+
 huggingface_hub==2.4.0
 click==8.5.0
 filelock==4.2.6
