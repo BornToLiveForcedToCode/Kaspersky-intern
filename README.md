@@ -41,7 +41,6 @@
 │   └── kustomization.yaml
 ├── load-tests/
 │   ├── benchmark.py
-│   ├── README.md
 │   ├── results-concurrency-1-repeat4.csv
 │   └── results-concurrency-2.csv
 ├── scripts/
