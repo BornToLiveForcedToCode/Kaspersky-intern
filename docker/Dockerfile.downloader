@@ -1,5 +1,4 @@
-# Lightweight, CPU-only image dedicated to downloading Hugging Face snapshots.
-# Runtime identity is unprivileged; the Pod mounts the PVC with fsGroup 10001.
+
 FROM python:3.12-slim-bookworm
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
