@@ -1,3 +1,4 @@
+#Eto voobshe kto-ot smotrit?
 from __future__ import annotations
 
 import argparse
