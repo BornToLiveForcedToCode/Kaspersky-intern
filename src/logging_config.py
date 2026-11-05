@@ -18,7 +18,6 @@ if not logger.handlers:
 
 
 async def audit_middleware(request: Request, call_next):
-    """Log that an inference API route was called, without logging its content."""
     path = request.url.path
     is_inference_route = path.startswith(("/v1/", "/v2/", "/inference"))
     if not is_inference_route:
@@ -32,8 +31,6 @@ async def audit_middleware(request: Request, call_next):
         status_code = response.status_code
         return response
     except Exception as exc:
-        # Do not use logger.exception(): exception messages/tracebacks can
-        # occasionally include data derived from request payloads.
         logger.warning(
             "inference_request_failed request_id=%s method=%s status=%d "
             "error_type=%s duration_ms=%.2f",
