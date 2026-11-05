@@ -172,7 +172,6 @@ kubectl create secret generic vllm-secrets -n llm `
   --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-Не коммить `api-token.txt`, токены и содержимое Secret в Git. Убедись, что `api-token.txt` присутствует в `.gitignore`. Если Secret уже существует и используется, при его обновлении синхронно сохрани новое значение API token в локальный файл.
 
 Сборка и загрузка образов должны быть выполнены до применения Deployment. Развёртывание:
 
