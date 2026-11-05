@@ -10,3 +10,4 @@ data:
     max_num_batched_tokens: 1024
     tensor_parallel_size: 1
     served_model_name: Qwen/Qwen2.5-0.5B-Instruct
+    #ya ochen ustal
