@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vllm-config
+data:
+  config.yaml: |
+    dtype: auto
+    max_model_len: 1024
+    max_num_seqs: 1
+    max_num_batched_tokens: 1024
+    tensor_parallel_size: 1
+    served_model_name: Qwen/Qwen2.5-0.5B-Instruct

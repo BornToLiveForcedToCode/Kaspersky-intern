@@ -1,0 +1,165 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm-api
+  labels:
+    app: vllm-api
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: vllm-api
+  template:
+    metadata:
+      labels:
+        app: vllm-api
+    spec:
+      terminationGracePeriodSeconds: 30
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        fsGroupChangePolicy: OnRootMismatch
+        seccompProfile:
+          type: RuntimeDefault
+      initContainers:
+        - name: model-downloader
+          image: vllm-downloader:0.33.0
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: MODEL_ID
+              value: Qwen/Qwen2.5-0.5B-Instruct
+            - name: MODEL_DIR
+              value: /models/Qwen2.5-0.5B-Instruct
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vllm-secrets
+                  key: HF_TOKEN
+            - name: HF_HOME
+              value: /models/.cache/huggingface
+            - name: HF_HUB_DISABLE_TELEMETRY
+              value: "1"
+          volumeMounts:
+            - name: model-store
+              mountPath: /models
+            - name: tmp
+              mountPath: /tmp
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          resources:
+            requests:
+              cpu: "100m"
+              memory: 128Mi
+            limits:
+              cpu: "1"
+              memory: 512Mi
+      containers:
+        - name: vllm
+          image: vllm-cpu:0.33.0
+          imagePullPolicy: IfNotPresent
+          command: ["/bin/sh", "-ec"]
+          args:
+            - |
+              exec vllm serve "${MODEL_PATH}" \
+                --host 0.0.0.0 \
+                --port 8000 \
+                --config /etc/vllm/config.yaml \
+                --api-key "${API_TOKEN}" \
+                --middleware logging_config.audit_middleware \
+                --disable-log-requests \
+                --disable-log-outputs \
+                --enforce-eager \
+                --kv-cache-memory-bytes 268435456
+          env:
+            - name: MODEL_PATH
+              value: /models/Qwen2.5-0.5B-Instruct
+            - name: API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: vllm-secrets
+                  key: API_TOKEN
+            - name: HF_HOME
+              value: /models/.cache/huggingface
+            - name: HF_HUB_OFFLINE
+              value: "1"
+            - name: TRANSFORMERS_OFFLINE
+              value: "1"
+            - name: HF_HUB_DISABLE_TELEMETRY
+              value: "1"
+            - name: VLLM_LOGGING_LEVEL
+              value: INFO
+            - name: VLLM_REQUEST_BODY_LOG_LEVEL
+              value: CRITICAL
+            - name: VLLM_CPU_OMP_THREADS_BIND
+              value: nobind
+            - name: OMP_NUM_THREADS
+              value: "2"
+            - name: HOME
+              value: /tmp/home
+          ports:
+            - name: http
+              containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - name: model-store
+              mountPath: /models
+            - name: vllm-config
+              mountPath: /etc/vllm
+              readOnly: true
+            - name: tmp
+              mountPath: /tmp
+            - name: dshm
+              mountPath: /dev/shm
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+            runAsGroup: 10001
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 90
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 6
+          resources:
+            requests:
+              cpu: "2"
+              memory: 2Gi
+            limits:
+              cpu: "4"
+              memory: 5Gi
+      volumes:
+        - name: model-store
+          persistentVolumeClaim:
+            claimName: model-cache
+        - name: vllm-config
+          configMap:
+            name: vllm-config
+        - name: tmp
+          emptyDir:
+            sizeLimit: 512Mi
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 256Mi
