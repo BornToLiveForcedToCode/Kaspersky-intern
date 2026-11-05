@@ -1,3 +1,4 @@
+#Ya hochu na stajku!
 $ErrorActionPreference = 'Stop'
 $Image = 'vllm/vllm-openai-cpu:v0.33.0'
 $Requirements = Join-Path $PSScriptRoot '..\docker\requirements.txt'
