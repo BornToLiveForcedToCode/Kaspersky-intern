@@ -445,12 +445,4 @@ kubectl rollout status deployment/vllm-api -n llm --timeout=10m
 - Увеличение `max_num_seqs`, `max_num_batched_tokens`, контекста или KV cache требует повторного тестирования на том же стенде и контроля RAM/CPU.
 - `python:3.12-slim-bookworm` в Dockerfile скачивателя указан тегом; для ещё более строгой воспроизводимости инфраструктуры можно дополнительно закрепить базовые образы по digest.
 
-## 13. Безопасность перед публикацией
-
-Перед отправкой репозитория:
-
-- убедись, что `api-token.txt` и другие секреты добавлены в `.gitignore`;
-- не добавляй реальные HF/API tokens, экспортированные Secret manifests или локальные `.env`;
-- проверь `git status` и содержимое файлов перед `git push`;
-- публикуй только benchmark CSV, в которых содержатся метрики и счётчики токенов, но нет prompt/response content.
 
