@@ -1,8 +1,3 @@
-"""Privacy-preserving ASGI audit middleware for the vLLM OpenAI API.
-
-Only request metadata is logged. Request bodies, prompts, authorization headers,
-and response bodies are never read or written to logs.
-"""
 from __future__ import annotations
 
 import logging
