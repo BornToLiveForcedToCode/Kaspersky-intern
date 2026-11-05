@@ -1,0 +1,26 @@
+# Lightweight, CPU-only image dedicated to downloading Hugging Face snapshots.
+# Runtime identity is unprivileged; the Pod mounts the PVC with fsGroup 10001.
+FROM python:3.12-slim-bookworm
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_NO_CACHE_DIR=1 \
+    HOME=/tmp/home \
+    HF_HOME=/models/.cache/huggingface \
+    HF_HUB_DISABLE_TELEMETRY=1
+
+WORKDIR /app
+
+COPY docker/downloader-requirements.txt /tmp/downloader-requirements.txt
+
+RUN python -m pip install --no-cache-dir --no-compile \
+      -r /tmp/downloader-requirements.txt \
+    && python -c "from huggingface_hub import snapshot_download; print('huggingface_hub downloader ready')"
+
+COPY src/download_model.py /app/download_model.py
+
+# No runtime root privileges are required.
+USER 10001:10001
+
+ENTRYPOINT ["python", "/app/download_model.py"]
