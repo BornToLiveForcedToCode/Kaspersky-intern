@@ -1,0 +1,14 @@
+# Secrets / local credentials
+.env
+.env.*
+api-token.txt
+k8s/secret.yaml
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# Local outputs
+results/
+*.log
